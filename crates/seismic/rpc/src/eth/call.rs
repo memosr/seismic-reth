@@ -222,7 +222,15 @@ where
 
         tracing::debug!("reth-seismic-rpc::eth create_txn_env {:?}", env);
 
-        Ok(SeismicTransaction { base: env, tx_hash: Default::default(), decryption_failed: false }
-            .into())
+        // Only reachable from the RPC read handlers, where a Seismic type byte means the request
+        // came in as an authenticated signed read (`ext.rs` sets it, and a plain call's type byte
+        // is cleared first, so it cannot be spoofed).
+        Ok(SeismicTransaction {
+            base: env,
+            tx_hash: Default::default(),
+            decryption_failed: false,
+            signed_read: tx_type == SEISMIC_TX_TYPE_ID,
+        }
+        .into())
     }
 }
